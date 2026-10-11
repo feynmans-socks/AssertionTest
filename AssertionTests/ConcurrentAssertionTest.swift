@@ -6,13 +6,14 @@ import CryptoKit
 import Testing
 
 @Test(
-  arguments: 0..<32
+  arguments: 0..<256
 )
 func testAssertions(it: UInt64) async throws {
   let keyId = try await KeyIdStore.keyId
   let clientDataHash = Data(SHA256.hash(data: Data("\(UUID().uuidString)".utf8)))
   await #expect(throws: Never.self) {
-    _ = try await DCAppAttestService.shared.generateAssertion(keyId, clientDataHash: clientDataHash)
+    let assertion = try await DCAppAttestService.shared.generateAssertion(keyId, clientDataHash: clientDataHash)
+    print("\(it): \(assertion.count)")
   }
 }
 
@@ -31,7 +32,8 @@ enum KeyIdStore {
         
         let keyID = try await attestService.generateKey()
         let clientDataHash = Data(SHA256.hash(data: Data(service.utf8)))
-        _ = try await attestService.attestKey(keyID, clientDataHash: clientDataHash)
+        let attestation = try await attestService.attestKey(keyID, clientDataHash: clientDataHash)
+        print("Attestation length: \(attestation.count)")
         try save(keyId: keyID)
         return keyID
       }
